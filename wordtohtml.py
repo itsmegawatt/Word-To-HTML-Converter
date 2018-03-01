@@ -51,7 +51,7 @@ def save_as_html(html_lines):
         file.write(line+"\n")
     file.close()
 
-def convert_to_html(docx_path):
+def convert_to_html_lines(docx_path):
     paragraphs = retrieve_paragraphs(docx_path)
     result = []
     for paragraph in paragraphs:
@@ -73,4 +73,4 @@ def convert_to_html(docx_path):
             final_text += text
             print(final_text)
         result.append(paragraph_text(final_text))
-    save_as_html(result)
+    return result
