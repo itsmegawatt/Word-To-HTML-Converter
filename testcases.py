@@ -28,6 +28,20 @@ class TestWordToHTMLConversion(unittest.TestCase):
     def test_underline_text(self):
         self.assertEqual(wth.underline_text(self.text), "<span style='text-decoration: underline;'>Hello</span>")
 
+    def test_change_symbols_to_character_codes(self):
+        self.assertEqual(wth.change_symbols_to_character_codes("&&&"), "&amp;&amp;&amp;")
+        self.assertEqual(wth.change_symbols_to_character_codes("‘‘‘"), "&apos;&apos;&apos;")
+        self.assertEqual(wth.change_symbols_to_character_codes("’’’"), "&apos;&apos;&apos;")
+        self.assertEqual(wth.change_symbols_to_character_codes(":::"), "&colon;&colon;&colon;")
+        self.assertEqual(wth.change_symbols_to_character_codes("–––"), "&ndash;&ndash;&ndash;")
+        self.assertEqual(wth.change_symbols_to_character_codes("“““"), "&quot;&quot;&quot;")
+        self.assertEqual(wth.change_symbols_to_character_codes("”””"), "&quot;&quot;&quot;")
+        self.assertEqual(wth.change_symbols_to_character_codes("<<<"), "&lt;&lt;&lt;")
+        self.assertEqual(wth.change_symbols_to_character_codes(">>>"), "&gt;&gt;&gt;")
+        self.assertEqual(wth.change_symbols_to_character_codes("………"), ".........")
+        self.assertEqual(wth.change_symbols_to_character_codes(""), "")
+        self.assertEqual(wth.change_symbols_to_character_codes(""), "")
+
     def test_is_bold(self):
         for paragraph in self.paragraphs:
             groups = paragraph.iter(self.NAMESPACE_GROUP)

@@ -45,6 +45,19 @@ def is_underline(group):
 def grab_text(group):
     return "".join(t.text for t in group.iter(wdr.NS_TEXT))
 
+def change_symbols_to_character_codes(text):
+    text = text.replace("&", "&amp;")
+    text = text.replace("‘", "&apos;")
+    text = text.replace("’", "&apos;")
+    text = text.replace(":", "&colon;")
+    text = text.replace("–", "&ndash;")
+    text = text.replace("“", "&quot;")
+    text = text.replace("”", "&quot;")
+    text = text.replace("<", "&lt;")
+    text = text.replace(">", "&gt;")
+    text = text.replace("…", "...")
+    return text
+
 def save_as_html(html_lines):
     file = open("testfile.html", "w")
     for line in html_lines:
@@ -63,6 +76,7 @@ def convert_to_html_lines(docx_path):
             needs_underline = is_underline(group)
 
             text = grab_text(group)
+            text = change_symbols_to_character_codes(text)
             if needs_bold:
                 text = bold_text(text)
             if needs_italics:
@@ -73,4 +87,5 @@ def convert_to_html_lines(docx_path):
             final_text += text
             print(final_text)
         result.append(paragraph_text(final_text))
+
     return result
