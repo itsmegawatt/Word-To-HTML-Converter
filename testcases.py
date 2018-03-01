@@ -65,5 +65,11 @@ class TestWordToHTMLConversion(unittest.TestCase):
                 text = "".join(t.text for t in group.iter(self.NAMESPACE + "t"))
                 self.assertEqual(text, wth.grab_text(group))
 
+    def test_run(self):
+        docx_path = r'test.docx'
+        text_lines = wth.convert_to_html_lines(docx_path)
+        print(text_lines)
+        wth.save_as_html(text_lines)
+
 if __name__ == '__main__':
     unittest.main()
