@@ -72,6 +72,14 @@ class TestWordToHTMLConversion(unittest.TestCase):
                     is_underline = True
                 self.assertEqual(is_underline, wth.is_underline(group))
 
+    def test_is_blank(self):
+        text1 = ''
+        text2 = '\n'
+        text3 = "not blank"
+        self.assertTrue(wth.is_blank(text1))
+        self.assertTrue(wth.is_blank(text2))
+        self.assertFalse(wth.is_blank(text3))
+
     def test_grab_text(self):
         for paragraph in self.paragraphs:
             groups = paragraph.iter(self.NAMESPACE_GROUP)

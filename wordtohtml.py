@@ -58,6 +58,9 @@ def change_symbols_to_character_codes(text):
     text = text.replace("…", "...")
     return text
 
+def is_blank(text):
+    return text == '' or text == '\n'
+
 def save_as_html(html_lines, filename):
     if ".html" not in filename:
         filename += ".html"
@@ -87,7 +90,8 @@ def convert_to_html_lines_from_paragraphs(paragraphs):
 
             final_text += text
             #print(final_text)
-        result.append(paragraph_text(final_text))
+        if not is_blank(final_text):
+            result.append(paragraph_text(final_text))
     return result
 
 def convert_to_html_lines_from_path(docx_path):
@@ -112,5 +116,6 @@ def convert_to_html_lines_from_path(docx_path):
 
             final_text += text
             #print(final_text)
-        result.append(paragraph_text(final_text))
+        if not is_blank(final_text):
+            result.append(paragraph_text(final_text))
     return result
