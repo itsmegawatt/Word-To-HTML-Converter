@@ -81,9 +81,15 @@ class TestWordToHTMLConversion(unittest.TestCase):
 
     def test_run(self):
         docx_path = r'test.docx'
-        text_lines = wth.convert_to_html_lines(docx_path)
-        print(text_lines)
-        wth.save_as_html(text_lines)
+        #Test1: Save HTML the normal way from paragraphs
+        paragraphs = wth.retrieve_paragraphs(docx_path)
+        html_lines = wth.convert_to_html_lines_from_paragraphs(paragraphs)
+        wth.save_as_html(html_lines, "test1")
+
+
+        #Test2: Save HTML the faster way directly from Path
+        html_lines_2 = wth.convert_to_html_lines_from_path(docx_path)
+        wth.save_as_html(html_lines_2, "test2.html")
 
 if __name__ == '__main__':
     unittest.main()

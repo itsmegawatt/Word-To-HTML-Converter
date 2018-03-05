@@ -58,13 +58,39 @@ def change_symbols_to_character_codes(text):
     text = text.replace("…", "...")
     return text
 
-def save_as_html(html_lines):
-    file = open("testfile.html", "w")
+def save_as_html(html_lines, filename):
+    if ".html" not in filename:
+        filename += ".html"
+    file = open(filename, "w")
     for line in html_lines:
         file.write(line+"\n")
     file.close()
 
-def convert_to_html_lines(docx_path):
+def convert_to_html_lines_from_paragraphs(paragraphs):
+    result = []
+    for paragraph in paragraphs:
+        final_text = ""
+        groups = paragraph.iter(NAMESPACE_GROUP)
+        for group in groups:
+            needs_bold = is_bold(group)
+            needs_italics = is_italics(group)
+            needs_underline = is_underline(group)
+
+            text = grab_text(group)
+            text = change_symbols_to_character_codes(text)
+            if needs_bold:
+                text = bold_text(text)
+            if needs_italics:
+                text = italicize_text(text)
+            if needs_underline:
+                text = underline_text(text)
+
+            final_text += text
+            #print(final_text)
+        result.append(paragraph_text(final_text))
+    return result
+
+def convert_to_html_lines_from_path(docx_path):
     paragraphs = retrieve_paragraphs(docx_path)
     result = []
     for paragraph in paragraphs:
@@ -85,7 +111,6 @@ def convert_to_html_lines(docx_path):
                 text = underline_text(text)
 
             final_text += text
-            print(final_text)
+            #print(final_text)
         result.append(paragraph_text(final_text))
-
     return result
