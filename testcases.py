@@ -1,14 +1,16 @@
 import unittest
 import wordtohtml as wth
+import worddocumentreader as wdr
 
 class TestWordToHTMLConversion(unittest.TestCase):
-    
+
     def setUp(self):
         self.NAMESPACE = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
         self.NAMESPACE_GROUP = self.NAMESPACE + "r"
         self.NAMESPACE_BOLD = self.NAMESPACE + "b"
         self.NAMESPACE_ITALICS = self.NAMESPACE + "i"
         self.NAMESPACE_UNDERLINE = self.NAMESPACE + "u"
+        self.NAMESPACE_LINEBREAK = self.NAMESPACE + "br"
 
         self.DOCX_PATH = r'test.docx'
         self.paragraphs = wth.retrieve_paragraphs(self.DOCX_PATH)
@@ -72,6 +74,19 @@ class TestWordToHTMLConversion(unittest.TestCase):
                     is_underline = True
                 self.assertEqual(is_underline, wth.is_underline(group))
 
+    def test_needs_linebreak_before(self):
+        docx_path = r'test2.docx'
+        paragraphs = wth.retrieve_paragraphs(docx_path)
+        for paragraph in paragraphs:
+            groups = paragraph.iter(self.NAMESPACE_GROUP)
+            for group in groups:
+                linebreaks = group.iter(self.NAMESPACE_LINEBREAK)
+                needs_linebreak_before = False
+                for linebreak in linebreaks:
+                    needs_linebreak_before = True
+                self.assertEqual(needs_linebreak_before, wth.needs_linebreak_before(group))
+
+
     def test_is_blank(self):
         text1 = ''
         text2 = '\n'
@@ -94,10 +109,15 @@ class TestWordToHTMLConversion(unittest.TestCase):
         html_lines = wth.convert_to_html_lines_from_paragraphs(paragraphs)
         wth.save_as_html(html_lines, "test1")
 
-
         #Test2: Save HTML the faster way directly from Path
-        html_lines_2 = wth.convert_to_html_lines_from_path(docx_path)
+        docx_path_2 = r'test2.docx'
+        html_lines_2 = wth.convert_to_html_lines_from_path(docx_path_2)
         wth.save_as_html(html_lines_2, "test2.html")
+
+        #Test3: Find paragraph invisible linebreaks
+        docx_path_3 = r'test2.docx'
+        html_lines_3 = wdr.extract_text_from_path(docx_path_3)
+        print(html_lines_3)
 
 if __name__ == '__main__':
     unittest.main()

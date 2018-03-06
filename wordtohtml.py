@@ -4,6 +4,7 @@ NAMESPACE_GROUP = wdr.NAMESPACE + "r"
 NAMESPACE_BOLD = wdr.NAMESPACE + "b"
 NAMESPACE_ITALICS = wdr.NAMESPACE + "i"
 NAMESPACE_UNDERLINE = wdr.NAMESPACE + "u"
+NAMESPACE_LINEBREAKS = wdr.NAMESPACE + "br"
 
 def retrieve_paragraphs(docx_path):
     xml = wdr.extract_xml_from_word(docx_path)
@@ -41,6 +42,13 @@ def is_underline(group):
     for underline in underlines:
         is_underline = True
     return is_underline
+
+def needs_linebreak_before(group):
+    linebreaks = group.iter(NAMESPACE_LINEBREAKS)
+    needs_linebreak = False
+    for linebreak in linebreaks:
+        needs_linebreak = True
+    return needs_linebreak
 
 def grab_text(group):
     return "".join(t.text for t in group.iter(wdr.NS_TEXT))
@@ -88,6 +96,8 @@ def convert_to_html_lines_from_paragraphs(paragraphs):
             if needs_underline:
                 text = underline_text(text)
 
+            if needs_linebreak_before(group):
+                final_text += "<br />"
             final_text += text
             #print(final_text)
         if not is_blank(final_text):
@@ -96,26 +106,4 @@ def convert_to_html_lines_from_paragraphs(paragraphs):
 
 def convert_to_html_lines_from_path(docx_path):
     paragraphs = retrieve_paragraphs(docx_path)
-    result = []
-    for paragraph in paragraphs:
-        final_text = ""
-        groups = paragraph.iter(NAMESPACE_GROUP)
-        for group in groups:
-            needs_bold = is_bold(group)
-            needs_italics = is_italics(group)
-            needs_underline = is_underline(group)
-
-            text = grab_text(group)
-            text = change_symbols_to_character_codes(text)
-            if needs_bold:
-                text = bold_text(text)
-            if needs_italics:
-                text = italicize_text(text)
-            if needs_underline:
-                text = underline_text(text)
-
-            final_text += text
-            #print(final_text)
-        if not is_blank(final_text):
-            result.append(paragraph_text(final_text))
-    return result
+    return convert_to_html_lines_from_paragraphs(paragraphs)
