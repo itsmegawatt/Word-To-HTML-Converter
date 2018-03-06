@@ -1,6 +1,5 @@
 import unittest
 import wordtohtml as wth
-import worddocumentreader as wdr
 
 class TestWordToHTMLConversion(unittest.TestCase):
 
@@ -86,7 +85,6 @@ class TestWordToHTMLConversion(unittest.TestCase):
                     needs_linebreak_before = True
                 self.assertEqual(needs_linebreak_before, wth.needs_linebreak_before(group))
 
-
     def test_is_blank(self):
         text1 = ''
         text2 = '\n'
@@ -102,22 +100,52 @@ class TestWordToHTMLConversion(unittest.TestCase):
                 text = "".join(t.text for t in group.iter(self.NAMESPACE + "t"))
                 self.assertEqual(text, wth.grab_text(group))
 
-    def test_run(self):
-        docx_path = r'test.docx'
+    def convert_to_html_lines_from_paragraphs(self, paragraphs):
+        result = []
+        for paragraph in paragraphs:
+            final_text = ""
+            groups = paragraph.iter(self.NAMESPACE_GROUP)
+            for group in groups:
+                needs_bold = wth.is_bold(group)
+                needs_italics = wth.is_italics(group)
+                needs_underline = wth.is_underline(group)
+
+                text = wth.grab_text(group)
+                text = wth.change_symbols_to_character_codes(text)
+                if needs_bold:
+                    text = wth.bold_text(text)
+                if needs_italics:
+                    text = wth.italicize_text(text)
+                if needs_underline:
+                    text = wth.underline_text(text)
+
+                if wth.needs_linebreak_before(group):
+                    final_text += "<br />"
+                final_text += text
+                #print(final_text)
+            if not wth.is_blank(final_text):
+                result.append(wth.paragraph_text(final_text))
+        return result
+
+    def test_run1(self):
         #Test1: Save HTML the normal way from paragraphs
+        docx_path = r'test.docx'
         paragraphs = wth.retrieve_paragraphs(docx_path)
-        html_lines = wth.convert_to_html_lines_from_paragraphs(paragraphs)
+        correct_html_lines = self.convert_to_html_lines_from_paragraphs(paragraphs)
+        paragraphs_again = wth.retrieve_paragraphs(docx_path)
+        html_lines = wth.convert_to_html_lines_from_paragraphs(paragraphs_again)
+        self.assertEqual(correct_html_lines, html_lines)
         wth.save_as_html(html_lines, "test1")
 
+    def test_run2(self):
         #Test2: Save HTML the faster way directly from Path
-        docx_path_2 = r'test2.docx'
-        html_lines_2 = wth.convert_to_html_lines_from_path(docx_path_2)
-        wth.save_as_html(html_lines_2, "test2.html")
-
-        #Test3: Find paragraph invisible linebreaks
-        docx_path_3 = r'test2.docx'
-        html_lines_3 = wdr.extract_text_from_path(docx_path_3)
-        print(html_lines_3)
+        docx_path = r'test2.docx'
+        paragraphs = wth.retrieve_paragraphs(docx_path)
+        correct_html_lines = self.convert_to_html_lines_from_paragraphs(paragraphs)
+        paragraphs_again = wth.retrieve_paragraphs(docx_path)
+        html_lines = wth.convert_to_html_lines_from_paragraphs(paragraphs_again)
+        self.assertEqual(correct_html_lines, html_lines)
+        wth.save_as_html(html_lines, "test2.html")
 
 if __name__ == '__main__':
     unittest.main()
