@@ -83,17 +83,14 @@ def convert_to_html_lines_from_paragraphs(paragraphs):
         final_text = ""
         groups = paragraph.iter(NAMESPACE_GROUP)
         for group in groups:
-            needs_bold = is_bold(group)
-            needs_italics = is_italics(group)
-            needs_underline = is_underline(group)
-
             text = grab_text(group)
             text = change_symbols_to_character_codes(text)
-            if needs_bold:
+
+            if is_bold(group):
                 text = bold_text(text)
-            if needs_italics:
+            if is_italics(group):
                 text = italicize_text(text)
-            if needs_underline:
+            if is_underline(group):
                 text = underline_text(text)
 
             if needs_linebreak_before(group):
