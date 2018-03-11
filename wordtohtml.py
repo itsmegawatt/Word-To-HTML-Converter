@@ -5,8 +5,10 @@ NAMESPACE_BOLD = wdr.NAMESPACE + "b"
 NAMESPACE_ITALICS = wdr.NAMESPACE + "i"
 NAMESPACE_UNDERLINE = wdr.NAMESPACE + "u"
 NAMESPACE_LINEBREAKS = wdr.NAMESPACE + "br"
+NAMESPACE_STRIKE = wdr.NAMESPACE + "strike"
 
 def retrieve_paragraphs(docx_path):
+    # This method can be moved to WDR
     xml = wdr.extract_xml_from_word(docx_path)
     return wdr.extract_paragraphs(xml)
 
@@ -22,7 +24,11 @@ def italicize_text(text):
 def underline_text(text):
     return "<span style='text-decoration: underline;'>" + text + "</span>"
 
+def strike_text(text):
+    return "<del>" + text + "</del>"
+
 def is_bold(group):
+    # The last 4 lines of all these "IS" methods can be refactored
     bolds = group.iter(NAMESPACE_BOLD)
     is_bold = False
     for bold in bolds:
@@ -42,6 +48,13 @@ def is_underline(group):
     for underline in underlines:
         is_underline = True
     return is_underline
+
+def is_strike(group):
+    strikes = group.iter(NAMESPACE_STRIKE)
+    is_strike = False
+    for strike in strikes:
+        is_strike = True
+    return is_strike
 
 def needs_linebreak_before(group):
     linebreaks = group.iter(NAMESPACE_LINEBREAKS)
@@ -92,6 +105,8 @@ def convert_to_html_lines_from_paragraphs(paragraphs):
                 text = italicize_text(text)
             if is_underline(group):
                 text = underline_text(text)
+            if is_strike(group):
+                text = strike_text(text)
 
             if needs_linebreak_before(group):
                 final_text += "<br />"
@@ -104,5 +119,3 @@ def convert_to_html_lines_from_paragraphs(paragraphs):
 def convert_to_html_lines_from_path(docx_path):
     paragraphs = retrieve_paragraphs(docx_path)
     return convert_to_html_lines_from_paragraphs(paragraphs)
-
-#test

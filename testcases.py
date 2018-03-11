@@ -10,6 +10,7 @@ class TestWordToHTMLConversion(unittest.TestCase):
         self.NAMESPACE_ITALICS = self.NAMESPACE + "i"
         self.NAMESPACE_UNDERLINE = self.NAMESPACE + "u"
         self.NAMESPACE_LINEBREAK = self.NAMESPACE + "br"
+        self.NAMESPACE_STRIKE = self.NAMESPACE + "strike"
 
         self.DOCX_PATH = r'test.docx'
         self.paragraphs = wth.retrieve_paragraphs(self.DOCX_PATH)
@@ -28,6 +29,9 @@ class TestWordToHTMLConversion(unittest.TestCase):
 
     def test_underline_text(self):
         self.assertEqual(wth.underline_text(self.text), "<span style='text-decoration: underline;'>Hello</span>")
+
+    def test_strike_text(self):
+        self.assertEqual(wth.strike_text(self.text), "<del>Hello</del>")
 
     def test_change_symbols_to_character_codes(self):
         self.assertEqual(wth.change_symbols_to_character_codes("&&&"), "&amp;&amp;&amp;")
@@ -73,6 +77,18 @@ class TestWordToHTMLConversion(unittest.TestCase):
                     is_underline = True
                 self.assertEqual(is_underline, wth.is_underline(group))
 
+    def test_is_strike(self):
+        docx_path = r'test3.docx'
+        paragraphs = wth.retrieve_paragraphs(docx_path)
+        for paragraph in paragraphs:
+            groups = paragraph.iter(self.NAMESPACE_GROUP)
+            for group in groups:
+                strikes = group.iter(self.NAMESPACE_STRIKE)
+                is_strike = False
+                for strike in strikes:
+                    is_strike = True
+                self.assertEqual(is_strike, wth.is_strike(group))
+
     def test_needs_linebreak_before(self):
         docx_path = r'test2.docx'
         paragraphs = wth.retrieve_paragraphs(docx_path)
@@ -109,6 +125,7 @@ class TestWordToHTMLConversion(unittest.TestCase):
                 needs_bold = wth.is_bold(group)
                 needs_italics = wth.is_italics(group)
                 needs_underline = wth.is_underline(group)
+                needs_strike = wth.is_strike(group)
 
                 text = wth.grab_text(group)
                 text = wth.change_symbols_to_character_codes(text)
@@ -118,6 +135,8 @@ class TestWordToHTMLConversion(unittest.TestCase):
                     text = wth.italicize_text(text)
                 if needs_underline:
                     text = wth.underline_text(text)
+                if needs_strike:
+                    text = wth.strike_text(text)
 
                 if wth.needs_linebreak_before(group):
                     final_text += "<br />"
@@ -128,7 +147,9 @@ class TestWordToHTMLConversion(unittest.TestCase):
         return result
 
     def test_run1(self):
-        #Test1: Save HTML the normal way from paragraphs
+        # Test1: Basic test of the formatting and html output
+        # Also tests bold, italics, underline, and symbols
+        # Saves HTML the normal way from paragraphs
         docx_path = r'test.docx'
         paragraphs = wth.retrieve_paragraphs(docx_path)
         correct_html_lines = self.convert_to_html_lines_from_paragraphs(paragraphs)
@@ -138,14 +159,24 @@ class TestWordToHTMLConversion(unittest.TestCase):
         wth.save_as_html(html_lines, "test1")
 
     def test_run2(self):
-        #Test2: Save HTML the faster way directly from Path
+        # Test2: Tests for linebreaks
+        # Saves HTML the faster way directly from Path
         docx_path = r'test2.docx'
+        paragraphs = wth.retrieve_paragraphs(docx_path)
+        correct_html_lines = self.convert_to_html_lines_from_paragraphs(paragraphs)
+        html_lines = wth.convert_to_html_lines_from_path(docx_path)
+        self.assertEqual(correct_html_lines, html_lines)
+        wth.save_as_html(html_lines, "test2.html")
+
+    def test_run3(self):
+        # Test3: Tests for strikethroughs
+        docx_path = r'test3.docx'
         paragraphs = wth.retrieve_paragraphs(docx_path)
         correct_html_lines = self.convert_to_html_lines_from_paragraphs(paragraphs)
         paragraphs_again = wth.retrieve_paragraphs(docx_path)
         html_lines = wth.convert_to_html_lines_from_paragraphs(paragraphs_again)
         self.assertEqual(correct_html_lines, html_lines)
-        wth.save_as_html(html_lines, "test2.html")
+        wth.save_as_html(html_lines, "test3.html")
 
 if __name__ == '__main__':
     unittest.main()
