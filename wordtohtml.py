@@ -77,6 +77,7 @@ def change_symbols_to_character_codes(text):
     text = text.replace("<", "&lt;")
     text = text.replace(">", "&gt;")
     text = text.replace("…", "...")
+    text = text.replace("—", "--")
     return text
 
 def is_blank(text):
